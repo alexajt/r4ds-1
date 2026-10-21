@@ -17,6 +17,7 @@ billboard <- read_csv("data/billboard.csv", show_col_types = FALSE)
 
 
 ```{r}
+#| include: false
 billboard |>
  select(artist, track, date.entered, wk1:wk4)
 
@@ -98,7 +99,13 @@ top_10_trajectories <- billboard_long |>
       transmute(artist, track, highlight = paste(artist, track, sep = " - ")),
     by = c("artist", "track")
   )
+```
 
+## Top-10 chart trajectories
+
+Each line shows a song's ranking over time. Lower numbers indicate a higher chart position.
+
+```{r}
 ggplot(top_10_trajectories, aes(x = week, y = rank, group = interaction(artist, track))) +
   geom_line(
     data = filter(top_10_trajectories, is.na(highlight)),
@@ -108,8 +115,30 @@ ggplot(top_10_trajectories, aes(x = week, y = rank, group = interaction(artist, 
   geom_line(
     data = filter(top_10_trajectories, !is.na(highlight)),
     aes(color = highlight),
-    linewidth = 1
+    linewidth = 1.1
   ) +
-  scale_y_reverse() +
-  labs(x = "Week", y = "Chart ranking", color = "Notable songs")
+  scale_x_continuous(breaks = seq(0, 70, by = 10)) +
+  scale_y_reverse(
+    breaks = c(1, seq(10, 100, by = 10)),
+    limits = c(100, 1)
+  ) +
+  scale_color_manual(
+    values = c(
+      "Creed - Higher" = "#D55E00",
+      "Lonestar - Amazed" = "#0072B2",
+      "Madonna - Music" = "#009E73"
+    )
+  ) +
+  labs(
+    title = "How top-10 songs moved on the Billboard chart",
+    x = "Week on chart",
+    y = "Ranking",
+    color = "Notable songs"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
 ```
